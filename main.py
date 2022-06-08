@@ -1,3 +1,4 @@
+import datetime
 import os
 import shutil
 import time
@@ -6,7 +7,6 @@ from os.path import splitext, exists
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from datetime import date
 
 source_dir = '/Users/eliasmansfield/Downloads/'
 dest_dir_img = '/Users/eliasmansfield/Desktop/Billeder/'
@@ -22,40 +22,39 @@ vid_ext = [".mkv", ".flv", ".vob", ".ogv", ".mng", ".avi", ".mov", ".qt", ".wmv"
            ".mxf", ".flv", ".f4v"]
 zip_ext = [".zip"]
 py_ext = [".py"]
-exe_ext = [".dmg"]
+exe_ext = [".dmg", ".exe", ".apk"]
 doc_ext = [".doc", ".docx", ".odt", ".pdf", ".xls", ".xlsx", ".ppt", ".pptx"]
 
-timevar = ["TIME", "__time__"]
+timevar = ["TIME", "__time__", "DATE"]
 
 
 def make_unique(path, destination):
     filename, extension = os.path.splitext(path)
     counter = 1
-    # * IF FILE EXISTS, ADDS NUMBER TO THE END OF THE FILENAME
     while exists(f'{destination}{path}'):
         path = f"{filename} ({counter}){extension}"
         counter += 1
     return path
 
 
+
 def move_file(extension, destination):
     with os.scandir(source_dir) as entries:
         for entry in entries:
             name = entry.name
-            file_name, file_ext = os.path.splitext(entry)
+            file_name, file_ext = os.path.splitext(name)
             if file_ext in extension:
-                if exists(f"{destination}{name}"):
+                if file_name in timevar:
+                    now = datetime.datetime.now()
+                    current_time = now.strftime("%H.%M.%S")
+                    date = f'{datetime.date.today()}_{current_time}'
+                    print(date)
+                    os.rename(entry, f'{destination}{date}')
+                elif exists(f"{destination}{name}"):
                     unique_name = make_unique(name, destination)
                     os.rename(entry, f'{destination}{unique_name}')
                 else:
                     shutil.move(entry.path, destination)
-
-
-"""def move_file(dest, entry, name):
-    if exists(f"{dest}/{name}"):
-        unique_name = make_unique(name)
-        os.rename(entry, unique_name)
-    shutil.move(entry, dest)"""
 
 
 class MoveHandler(FileSystemEventHandler):
