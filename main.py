@@ -28,13 +28,12 @@ doc_ext = [".doc", ".docx", ".odt", ".pdf", ".xls", ".xlsx", ".ppt", ".pptx"]
 timevar = ["TIME", "__time__"]
 
 
-def make_unique(path):
+def make_unique(path, destination):
     filename, extension = os.path.splitext(path)
     counter = 1
     # * IF FILE EXISTS, ADDS NUMBER TO THE END OF THE FILENAME
-    while exists(path):
+    while exists(f'{destination}{path}'):
         path = f"{filename} ({counter}){extension}"
-        print(counter)
         counter += 1
     return path
 
@@ -46,9 +45,8 @@ def move_file(extension, destination):
             file_name, file_ext = os.path.splitext(entry)
             if file_ext in extension:
                 if exists(f"{destination}{name}"):
-                    unique_name = make_unique(f"{file_name}{file_ext}")
-                    os.rename(entry, unique_name)
-                    print(unique_name)
+                    unique_name = make_unique(name, destination)
+                    os.rename(entry, f'{destination}{unique_name}')
                 else:
                     shutil.move(entry.path, destination)
 
